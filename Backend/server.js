@@ -7,14 +7,24 @@ import clerkWebHook from "./controllers/ClerkWebhooks.js";
 
 connectDB();
 const app = express();
-app.use(cors()); // Cross Origin Resource Shareing
 
+// CORS middleware
+app.use(cors());
+
+// IMPORTANT: Parse webhook body as text for signature verification
+app.use("/api/clerk", express.text({ type: "application/json" }));
+
+// JSON middleware for other routes (after webhook route)
+app.use(express.json());
+
+// Clerk middleware
 app.use(clerkMiddleware());
 
-app.use("/api/clerk", clerkWebHook)
+// Webhook route - MUST be POST
+app.post("/api/clerk", clerkWebHook);
 
-app.get("/", (req, res) => res.send("Api is working fine...."));
+// Default route
+app.get("/", (req, res) => res.send("API is working fine...."));
 
 const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

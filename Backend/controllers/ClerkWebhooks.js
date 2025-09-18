@@ -5,6 +5,15 @@ import { Webhook } from "svix";
 const clerkWebHook = async (req, res) => {
   try {
     console.log("Webhook received");
+    console.log("Headers:", req.headers);
+    console.log("Body type:", typeof req.body);
+    console.log("Body length:", req.body?.length);
+    
+    // Check if webhook secret exists
+    if (!process.env.CLERK_WEBHOOK_SECRET) {
+      console.error("CLERK_WEBHOOK_SECRET is not set");
+      return res.status(500).json({ error: "Webhook secret not configured" });
+    }
     
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
     
@@ -14,10 +23,10 @@ const clerkWebHook = async (req, res) => {
       "svix-signature": req.headers["svix-signature"],
     };
 
+    console.log("Svix headers:", headers);
+
     // For simple approach, req.body is already a string
     const evt = whook.verify(req.body, headers);
-    console.log(evt);
-    
     const { data, type } = evt;
     
     console.log("Event type:", type);
