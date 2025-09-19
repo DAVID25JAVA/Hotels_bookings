@@ -4,8 +4,13 @@ import "dotenv/config";
 import connectDB from "./configs/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import clerkWebHook from "./controllers/ClerkWebhooks.js";
+import userRouter from "./routes/userRoute.js";
+import hotelRouter from "./routes/hotelRoutes.js";
+import connectCloudinary from "./configs/claudinary.js";
+import roomRouter from "./routes/roomRoutes.js";
 
 connectDB();
+connectCloudinary();
 const app = express();
 
 // CORS middleware
@@ -25,6 +30,9 @@ app.post("/api/clerk", clerkWebHook);
 
 // Default route
 app.get("/", (req, res) => res.send("API is working fine...."));
+app.use("/api/user", userRouter);
+app.use("/api/hotels", hotelRouter)
+app.use("/api/rooms", roomRouter)
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
