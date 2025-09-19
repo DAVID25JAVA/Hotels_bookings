@@ -15,7 +15,7 @@ function MainHeader() {
               <p className="text-white  md:mt-0 w-64 py-1 rounded-full opacity-75 text-center bg-primary">
                 The Ultimate Hotel Experience
               </p>
-              <h1 className="text-white font-playfair md:text-6xl text-4xl md:max-w-xl font-semibold">
+              <h1 className="text-white font-playfair text-4xl md:text-6xl md:max-w-xl font-semibold">
                 Discover Your Perfect Gateway Destination
               </h1>
               <p className="text-white text-lg max-w-xl font-semibold">

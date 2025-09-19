@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 
 function FeaturedDestination() {
   const router = useRouter();
-  console.log("rooms Data--->", roomsDummyData);
+  // console.log("rooms Data--->", roomsDummyData);
 
   return (
     <div className="md:pb-20 bg-green-50 md:max-w-8xl xl:px-20 w-full mx-auto">

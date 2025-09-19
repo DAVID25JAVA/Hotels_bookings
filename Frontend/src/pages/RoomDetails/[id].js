@@ -18,7 +18,7 @@ function RoomDetails() {
     roomData && setRoomImage(roomData?.images[0]);
   }, [roomsId]);
 
-  console.log("Rooms data----->", roomsData);
+  // console.log("Rooms data----->", roomsData);
 
   return (
     roomsData && (

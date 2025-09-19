@@ -3,6 +3,8 @@ import DashboardLayout from "@/components/HotelOwner/DashboardLayout";
 import "../styles/globals.css";
 import Layout from "@/components/Layout";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "react-hot-toast";
+import { AppProvider } from "@/context/AppContext";
 
 export default function MyApp({ Component, pageProps, router }) {
   // Check if current route is under /dashboard
@@ -11,17 +13,29 @@ export default function MyApp({ Component, pageProps, router }) {
   if (isDashboardRoute) {
     // Wrap dashboard pages with DashboardLayout
     return (
-      <DashboardLayout>
-        <Component {...pageProps} />
-      </DashboardLayout>
+      <div>
+        <Toaster />
+        <ClerkProvider>
+          <DashboardLayout>
+            <AppProvider>
+              <Component {...pageProps} />
+            </AppProvider>
+          </DashboardLayout>
+        </ClerkProvider>
+      </div>
     );
   }
 
   return (
-    <ClerkProvider>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
-    </ClerkProvider>
+    <div>
+      <Toaster />
+      <ClerkProvider>
+        <Layout>
+          <AppProvider>
+            <Component {...pageProps} />
+          </AppProvider>
+        </Layout>
+      </ClerkProvider>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { MenuIcon, Search } from "lucide-react";
 import { useUser, useClerk, UserButton } from "@clerk/nextjs";
@@ -10,6 +10,7 @@ function Navbar({ openRegisterModal }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openSignIn } = useClerk();
   const { user } = useUser();
+  // const { router } = useContext();
 
   const navLinks = [
     { name: "Home", path: "/" },
