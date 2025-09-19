@@ -8,6 +8,7 @@ import userRouter from "./routes/userRoute.js";
 import hotelRouter from "./routes/hotelRoutes.js";
 import connectCloudinary from "./configs/claudinary.js";
 import roomRouter from "./routes/roomRoutes.js";
+import bookingRouter from "./routes/bookingsRoutes.js";
 
 connectDB();
 connectCloudinary();
@@ -31,8 +32,9 @@ app.post("/api/clerk", clerkWebHook);
 // Default route
 app.get("/", (req, res) => res.send("API is working fine...."));
 app.use("/api/user", userRouter);
-app.use("/api/hotels", hotelRouter)
-app.use("/api/rooms", roomRouter)
+app.use("/api/hotels", hotelRouter);
+app.use("/api/rooms", roomRouter);
+app.use("/api/bookings", bookingRouter);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
