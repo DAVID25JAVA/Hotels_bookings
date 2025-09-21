@@ -1,16 +1,23 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { MenuIcon, Search } from "lucide-react";
-import { useUser, useClerk, UserButton } from "@clerk/nextjs";
+import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { MenuIcon, X } from "lucide-react";
+import { useClerk, UserButton } from "@clerk/nextjs";
+import { useAppContext } from "@/context/AppContext";
 
 function Navbar({ openRegisterModal }) {
-  const router = useRouter();
+  // const router = useRouter();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openSignIn } = useClerk();
-  const { user } = useUser();
-  // const { router } = useContext();
+  // const { user } = useUser();
+  const {
+    isOwner,
+    user,
+    router,
+    showHotelReg,
+    setShowHotelReg,
+  } = useAppContext();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -95,10 +102,12 @@ function Navbar({ openRegisterModal }) {
             {/* Dashboard Button */}
             {user && (
               <div
-                onClick={() => router.push("/dashboard")}
+                onClick={() =>
+                  isOwner ? router.push("/dashboard") : openRegisterModal()
+                }
                 className={` cursor-pointer font-semibold  px-4 border rounded-full ${textColorClass}`}
               >
-                Dashboard
+                {isOwner ? "Dashboard" : "List Your Hotel"}
               </div>
             )}
           </div>
@@ -156,16 +165,7 @@ function Navbar({ openRegisterModal }) {
               className="absolute top-4 right-4"
               onClick={() => setIsMenuOpen(false)}
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X />
             </button>
 
             {navLinks.map((link, i) => (
@@ -179,12 +179,32 @@ function Navbar({ openRegisterModal }) {
               </div>
             ))}
 
-            <button
-              onClick={() => router.push("/auth/Login")}
-              className="bg-black font-semibold font-playfair text-white px-8 py-2.5 rounded-full transition-all duration-500"
-            >
-              Login
-            </button>
+            {user && (
+              <div
+                onClick={() =>
+                  isOwner ? router.push("/dashboard") : (openRegisterModal(true) ,setIsMenuOpen(false))
+                }
+                className="border px-3 py-1 rounded-full text-sm"
+              >
+                {isOwner ? "Dashboard" : "List Your Hotel"}
+              </div>
+            )}
+
+            {user ? (
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="My Bookings"
+                    labelIcon={<MenuIcon className="h-5" />}
+                    onClick={() => router.push("/MyBooking")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            ) : (
+              <button onClick={()=>{openSignIn(), setIsMenuOpen(false)}} className="bg-black font-semibold font-playfair text-white px-8 py-2.5 rounded-full transition-all duration-500">
+                Login
+              </button>
+            )}
           </div>
         </div>
       </div>

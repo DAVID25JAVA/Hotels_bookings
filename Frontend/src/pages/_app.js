@@ -16,11 +16,11 @@ export default function MyApp({ Component, pageProps, router }) {
       <div>
         <Toaster />
         <ClerkProvider>
-          <DashboardLayout>
-            <AppProvider>
+          <AppProvider>
+            <DashboardLayout>
               <Component {...pageProps} />
-            </AppProvider>
-          </DashboardLayout>
+            </DashboardLayout>
+          </AppProvider>
         </ClerkProvider>
       </div>
     );
@@ -30,11 +30,11 @@ export default function MyApp({ Component, pageProps, router }) {
     <div>
       <Toaster />
       <ClerkProvider>
-        <Layout>
-          <AppProvider>
+        <AppProvider>
+          <Layout>
             <Component {...pageProps} />
-          </AppProvider>
-        </Layout>
+          </Layout>
+        </AppProvider>
       </ClerkProvider>
     </div>
   );

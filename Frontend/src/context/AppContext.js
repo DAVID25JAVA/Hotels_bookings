@@ -3,9 +3,10 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useAuth, useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
+ 
+
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -14,7 +15,6 @@ export const AppProvider = ({ children }) => {
   console.log(user);
   
   const { getToken } = useAuth();
-
   const [isOwner, setIsOwner] = useState(false);
   const [showHotelReg, setShowHotelReg] = useState(false);
   const [searchCities, setSearchCities] = useState([]);
