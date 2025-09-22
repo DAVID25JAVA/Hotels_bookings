@@ -1,73 +1,56 @@
-import React, { useState } from 'react';
-import { Calendar, DollarSign, TrendingUp, Users } from 'lucide-react';
-import { dashboardDummyData } from '../../../public/assets';
+import React, { useEffect, useState } from "react";
+import { Calendar, DollarSign, TrendingUp, Users } from "lucide-react";
+import { dashboardDummyData } from "../../../public/assets";
+import toast from "react-hot-toast";
+import { useAppContext } from "@/context/AppContext";
+ 
 
 function Dashboard() {
-    const [dashboardData, setDashboardData] = useState(dashboardDummyData);
-    console.log("dashboard data----->",dashboardData);
-    
-   
-  const recentBookings = [
-    {
-      id: 1,
-      userName: "John Doe",
-      roomName: "Deluxe Ocean View",
-      totalAmount: "$450",
-      paymentStatus: "Paid",
-      bookingDate: "2024-01-15"
-    },
-    {
-      id: 2,
-      userName: "Sarah Johnson",
-      roomName: "Premium Suite",
-      totalAmount: "$680",
-      paymentStatus: "Paid",
-      bookingDate: "2024-01-14"
-    },
-    {
-      id: 3,
-      userName: "Mike Wilson",
-      roomName: "Standard Room",
-      totalAmount: "$280",
-      paymentStatus: "Pending",
-      bookingDate: "2024-01-14"
-    },
-    {
-      id: 4,
-      userName: "Emily Brown",
-      roomName: "Executive Suite",
-      totalAmount: "$850",
-      paymentStatus: "Paid",
-      bookingDate: "2024-01-13"
-    },
-    {
-      id: 5,
-      userName: "David Chen",
-      roomName: "Family Room",
-      totalAmount: "$520",
-      paymentStatus: "Failed",
-      bookingDate: "2024-01-13"
-    },
-    {
-      id: 6,
-      userName: "Lisa Garcia",
-      roomName: "Luxury Villa",
-      totalAmount: "$1200",
-      paymentStatus: "Paid",
-      bookingDate: "2024-01-12"
+  const { user, axios, getToken, } = useAppContext();
+  const [dashboardData, setDashboardData] = useState({
+    booking: [],
+    totalRevenue: "",
+    totalBooking: "",
+  });
+  console.log("dashboard data----->", dashboardData);
+
+  const fetchRecentBooking = async () => {
+    try {
+      const { data } = await axios.get("/api/bookings/hotels", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      if (data?.success) {
+        setDashboardData({
+          booking: data?.dashboardData,
+          totalBooking: data?.totalBooking,
+          totalRevenue: data?.totalRevenue,
+        });
+      } else {
+        toast.error(data?.message);
+      }
+    } catch (error) {
+      toast.error(error?.message);
     }
-  ];
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchRecentBooking();
+    }
+  }, [user]);
+
+   
 
   // Function to get payment status styling
   const getPaymentStatusStyle = (status) => {
     switch (status) {
       case true:
-        return 'bg-green-100 text-green-800';
+        return "bg-green-100 text-green-800";
       case false:
-        return 'bg-yellow-100 text-yellow-800';
-       
+        return "bg-yellow-100 text-yellow-800";
+
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -75,11 +58,10 @@ function Dashboard() {
     <div className="space-y-8">
       {/* Header Section */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Dashboard
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
         <p className="text-gray-600">
-          Welcome back! Here's an overview of your hotel performance and recent bookings.
+          Welcome back! Here's an overview of your hotel performance and recent
+          bookings.
         </p>
       </div>
 
@@ -92,9 +74,15 @@ function Dashboard() {
               <Calendar className="w-6 h-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Bookings</p>
-                          <p className="text-2xl font-bold text-gray-900">{ dashboardDummyData?.totalBookings}</p>
-              <p className="text-xs text-green-600 mt-1">+12% from last month</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Bookings
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {/* {dashboardDummyData?.totalBookings} */}
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                +12% from last month
+              </p>
             </div>
           </div>
         </div>
@@ -107,7 +95,9 @@ function Dashboard() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                          <p className="text-2xl font-bold text-gray-900">${ dashboardDummyData?.totalRevenue}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {/* ${dashboardDummyData?.totalRevenue} */}
+              </p>
               <p className="text-xs text-green-600 mt-1">+8% from last month</p>
             </div>
           </div>
@@ -136,7 +126,9 @@ function Dashboard() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Guests</p>
               <p className="text-2xl font-bold text-gray-900">2,847</p>
-              <p className="text-xs text-green-600 mt-1">+15% from last month</p>
+              <p className="text-xs text-green-600 mt-1">
+                +15% from last month
+              </p>
             </div>
           </div>
         </div>
@@ -145,8 +137,12 @@ function Dashboard() {
       {/* Recent Bookings Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
-          <p className="text-sm text-gray-600 mt-1">Latest booking transactions from your hotel</p>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Recent Bookings
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Latest booking transactions from your hotel
+          </p>
         </div>
 
         <div className="overflow-x-auto">
@@ -171,7 +167,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {dashboardData?.bookings.map((booking) => (
+              {dashboardData?.booking.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -190,7 +186,9 @@ function Dashboard() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{booking.room?.roomType}</div>
+                    <div className="text-sm text-gray-900">
+                      {booking.room?.roomType}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
@@ -198,8 +196,12 @@ function Dashboard() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full  ${getPaymentStatusStyle(booking?.isPaid)}`}>
-                      {booking.isPaid?"Paid":"Pending"}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full  ${getPaymentStatusStyle(
+                        booking?.isPaid
+                      )}`}
+                    >
+                      {booking.isPaid ? "Paid" : "Pending"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -215,10 +217,13 @@ function Dashboard() {
         <div className="px-6 py-3 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              Showing {recentBookings.length} of {recentBookings.length} results
+              {/* Showing {recentBookings.length} of {recentBookings.length} results */}
             </div>
             <div className="text-sm">
-              <a href="#" className="text-blue-600 hover:text-blue-500 font-medium">
+              <a
+                href="#"
+                className="text-blue-600 hover:text-blue-500 font-medium"
+              >
                 View all bookings →
               </a>
             </div>
@@ -230,26 +235,36 @@ function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Quick Actions */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Quick Actions
+          </h3>
           <div className="space-y-3">
             <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <div className="font-medium text-gray-900">Add New Room</div>
-              <div className="text-sm text-gray-600">Create a new room listing</div>
+              <div className="text-sm text-gray-600">
+                Create a new room listing
+              </div>
             </button>
             <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <div className="font-medium text-gray-900">View Reports</div>
-              <div className="text-sm text-gray-600">Check detailed analytics</div>
+              <div className="text-sm text-gray-600">
+                Check detailed analytics
+              </div>
             </button>
             <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <div className="font-medium text-gray-900">Manage Settings</div>
-              <div className="text-sm text-gray-600">Update hotel preferences</div>
+              <div className="text-sm text-gray-600">
+                Update hotel preferences
+              </div>
             </button>
           </div>
         </div>
 
         {/* Recent Activity */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Recent Activity
+          </h3>
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-2"></div>

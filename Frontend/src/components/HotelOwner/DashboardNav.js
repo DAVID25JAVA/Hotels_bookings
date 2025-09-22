@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { useRouter } from "next/router";
-import { assets } from "../../../public/assets";
+
+import { UserButton } from "@clerk/nextjs";
+import { useAppContext } from "@/context/AppContext";
 
 function DashboardNavbar({ toggleSidebar, isSidebarOpen }) {
-  const router = useRouter();
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const { user } = useAppContext();
 
   return (
     <nav className="bg-white   border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
@@ -38,51 +38,9 @@ function DashboardNavbar({ toggleSidebar, isSidebarOpen }) {
                 )}
               </svg>
             </button>
-
-            <div className="flex items-center gap-2">
-              <div className=" invert p-2 rounded-lg">
-                <img
-                  src="/logo.png"
-                  alt="Hotel Dashboard"
-                  className="h-8 w-auto"
-                />
-              </div>
-               
-            </div>
           </div>
-
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div 
-                className="cursor-pointer"
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              >
-                <img
-                  src={assets.userIcon?.src}
-                  className="w-9 h-9 bg-black rounded-full"
-                  alt="User Profile"
-                />
-              </div>
-              
-              {/* Profile Dropdown */}
-              {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Profile Settings
-                  </a>
-                  <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Account Settings
-                  </a>
-                  <hr className="my-1" />
-                  <button
-                    onClick={() => router.push("/")}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
+          <div className="flex items-end gap-2">
+            {user && <UserButton></UserButton>}
           </div>
         </div>
       </div>

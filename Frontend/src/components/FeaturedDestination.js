@@ -2,9 +2,11 @@ import React from "react";
 import { assets, roomsDummyData } from "../../public/assets";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { useAppContext } from "@/context/AppContext";
 
 function FeaturedDestination() {
   const router = useRouter();
+  const { rooms } = useAppContext();
   // console.log("rooms Data--->", roomsDummyData);
 
   return (
@@ -20,7 +22,7 @@ function FeaturedDestination() {
 
         {/* Cards Grid */}
         <div className="flex flex-wrap justify-center gap-6 mt-12">
-          {roomsDummyData?.slice(0, 4)?.map((room, index) => (
+          {rooms?.slice(0, 4)?.map((room, index) => (
             <div
               key={room?._id}
               className="relative md:w-[310px] bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"

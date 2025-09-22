@@ -3,8 +3,6 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useAuth, useUser } from "@clerk/nextjs";
 import toast from "react-hot-toast";
- 
-
 
 axios.defaults.baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const AppContext = createContext();
@@ -12,19 +10,34 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const router = useRouter();
   const { user } = useUser();
-  console.log(user);
-  
   const { getToken } = useAuth();
   const [isOwner, setIsOwner] = useState(false);
   const [showHotelReg, setShowHotelReg] = useState(false);
   const [searchCities, setSearchCities] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const currency = process.env.NEXT_PUBLIC_CURRENCY || $;
 
+  const fetchRooms = async () => {
+    try {
+      const { data } = await axios.get("/api/rooms", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      console.log("Rooms data----->", data);
+
+      if (data?.success) {
+        setRooms(data?.room);
+      } else {
+        toast.error(data?.message);
+      }
+    } catch (error) {
+      toast.error(error?.message);
+    }
+  };
 
   const fetchUser = async () => {
     try {
       const { data } = await axios.get("/api/user", {
-        headers:{Authorization: `Bearer ${await getToken()}`},
+        headers: { Authorization: `Bearer ${await getToken()}` },
       });
       if (data?.success) {
         setIsOwner(data?.role === "hotelOwner");
@@ -42,6 +55,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchUser();
+      fetchRooms();
     }
   }, [user]);
 
@@ -56,6 +70,7 @@ export const AppProvider = ({ children }) => {
     setShowHotelReg,
     axios,
     searchCities,
+    rooms,
     setSearchCities,
   };
 
