@@ -7,7 +7,7 @@ import { useAppContext } from "@/context/AppContext";
 function FeaturedDestination() {
   const router = useRouter();
   const { rooms } = useAppContext();
-  // console.log("rooms Data--->", roomsDummyData);
+  console.log("rooms Data--->", rooms);
 
   return (
     <div className="md:pb-20 bg-green-50 md:max-w-8xl xl:px-20 w-full mx-auto">
@@ -35,10 +35,10 @@ function FeaturedDestination() {
               )}
 
               {/* Image */}
-              <Image
+              <img
                 onClick={() => router.push(`RoomDetails/${room?._id}`)}
-                className="object-cover cursor-pointer"
-                src={room?.images[0]}
+                className="object-cover cursor-pointer h-60"
+                src={room?.image[0]}
                 alt="Hotel image"
                 width={310}
                 height={200}
