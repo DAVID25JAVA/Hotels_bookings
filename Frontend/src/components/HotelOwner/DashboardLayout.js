@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DashboardNav from "./DashboardNav";
 import DashboardSidebar from "./DashboardSidebar";
 import { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 
 function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { router, isOwner } = useAppContext();
+
+  // useEffect(() => {
+  //   if (!isOwner) {
+  //     router.push('/')
+  //   }
+  // },[isOwner])
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
