@@ -46,8 +46,11 @@ export const createBookings = async (req, res) => {
     if (!isAvailable)
       return res.json({ success: false, message: "Room is not available" });
 
+    console.log("data----->", checkInDate, checkOutDate, guests, room, user);
+
     //   get total price from room
     const roomData = await Hotel.findById(room).populate("hotel");
+    console.log(roomData);
     let totalPrice = roomData.pricePerNight;
 
     //   Calculate total price based on nights
@@ -66,6 +69,8 @@ export const createBookings = async (req, res) => {
       hotel: roomData?.hotel?._id,
       totalPrice,
     });
+
+    console.log("bboking--->", booking);
 
     res.json({ success: true, message: "Booking created successfully" });
   } catch (error) {
@@ -88,23 +93,23 @@ export const getAllBookingByUser = async (req, res) => {
   }
 };
 
-
 export const getHotelBookings = async (req, res) => {
-   try {
+  try {
     const hotel = await Hotel.findOne({ owner: req.auth.userId });
-  if (!hotel) return res.json({ success: false, message: "Hotel not found" });
-  const booking = await Booking.find({ hotel: hotel?._id })
-    .populate("room hotel user")
-    .sort({ created: -1 });
+    if (!hotel) return res.json({ success: false, message: "Hotel not found" });
+    const booking = await Booking.find({ hotel: hotel?._id })
+      .populate("room hotel user")
+      .sort({ created: -1 });
 
-  //   Total booking
-  const totalBookings = booking.length;
-  // Total revenue
-  const revenue = booking.reduce((acc, booking) => acc + booking.totalPrice, 0);
-  res.json({ success: true, dashboardData: { totalBookings, revenue } });
-   } catch (error) {
+    //   Total booking
+    const totalBookings = booking.length;
+    // Total revenue
+    const revenue = booking.reduce(
+      (acc, booking) => acc + booking.totalPrice,
+      0
+    );
+    res.json({ success: true, dashboardData: { totalBookings, revenue } });
+  } catch (error) {
     res.json({ success: false, message: "Faild to fetch booking" });
-   }
+  }
 };
-
-
