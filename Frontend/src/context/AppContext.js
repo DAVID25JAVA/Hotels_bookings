@@ -22,8 +22,6 @@ export const AppProvider = ({ children }) => {
       const { data } = await axios.get("/api/rooms", {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
-      // console.log("Rooms data----->", data);
-
       if (data?.success) {
         setRooms(data?.room);
       } else {
@@ -55,13 +53,12 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchUser();
-     
     }
   }, [user]);
 
   useEffect(() => {
-      fetchRooms();
-  },[user])
+    fetchRooms();
+  }, [user]);
 
   const value = {
     currency,

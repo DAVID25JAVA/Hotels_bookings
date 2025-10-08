@@ -1,65 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { facilityIcons } from "../../public/assets";
+
 import StarRating from "@/components/StarRating";
 import { useRouter } from "next/router";
 import ReactPaginate from "react-paginate";
 import { useAppContext } from "@/context/AppContext";
-import axios from "axios"; // Import if needed for fetching (adjust path if using context's axios)
-import { MapIcon, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Loader from "@/components/Loader";
 
 function Rooms() {
   const router = useRouter();
   const [showFilters, setShowFilters] = useState(false);
-  const { getToken, rooms, setRooms } = useAppContext(); // Assume setRooms exists in context for updating
+  const { getToken, rooms, setRooms } = useAppContext();
   const [selectedFilter, setSelectedFilter] = useState({
-    roomType: "", // Single-select string
-    priceRange: "", // Single-select string
+    roomType: "",
+    priceRange: "",
   });
   const [selectedSort, setSelectedSort] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const itemsPerPage = 2;
 
-  // Optional: Fetch rooms if not loaded in context (uncomment if needed)
-  /*
-  useEffect(() => {
-    const fetchRooms = async () => {
-      if (rooms.length === 0) {
-        setLoading(true);
-        try {
-          const token = await getToken();
-          const { data } = await axios.get("/api/rooms", { // Your public rooms API endpoint
-            headers: { Authorization: `Bearer ${token}` }, // Remove if public (no auth)
-          });
-          if (data?.success) {
-            setRooms(data.rooms); // Update context
-          } else {
-            console.error("Failed to fetch rooms:", data?.message);
-          }
-        } catch (error) {
-          console.error("Fetch rooms error:", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    };
-    fetchRooms();
-  }, [rooms.length, getToken, setRooms]);
-  */
-
   // Helper to parse price range string (e.g., "$ 0 to 500" -> [0, 500])
   const parsePriceRange = (rangeStr) => {
-    if (!rangeStr) return [0, Infinity]; // No filter: all prices
+    if (!rangeStr) return [0, Infinity];
     const [minStr, maxStr] = rangeStr.split(" to ");
-    const min = Number(minStr.replace(/[^\d]/g, '')); // Remove non-digits (e.g., "$ 0" -> "0" -> 0)
-    const max = Number(maxStr.replace(/[^\d]/g, '')); // e.g., "500" -> 500
+    const min = Number(minStr.replace(/[^\d]/g, ""));
+    const max = Number(maxStr.replace(/[^\d]/g, ""));
     return [min, max];
   };
 
-  // Filter logic helpers (updated for single-select strings)
   const matchRoomType = (room) => {
     return (
       selectedFilter.roomType === "" ||
@@ -68,30 +37,30 @@ function Rooms() {
   };
 
   const matchesPriceRange = (room) => {
-    if (selectedFilter.priceRange === "") return true; // No filter applied
-    const price = Number(room?.pricePerNight || 0); // Parse string to number (e.g., "4493" -> 4493)
+    if (selectedFilter.priceRange === "") return true;
+    const price = Number(room?.pricePerNight || 0);
     const [min, max] = parsePriceRange(selectedFilter.priceRange);
     const matches = price >= min && price <= max;
-    
-    // Debug log (remove after testing)
-    console.log(`Price check: Room ${room?._id} ($${price}) vs Range "${selectedFilter.priceRange}" [${min}, ${max}] = ${matches}`);
-    
+
+    // console.log(
+    //   `Price check: Room ${room?._id} ($${price}) vs Range "${selectedFilter.priceRange}" [${min}, ${max}] = ${matches}`
+    // );
+
     return matches;
   };
 
-  // Filter rooms based on selected filters
   const filterRooms = () => {
     const filtered = rooms.filter(
       (room) => matchRoomType(room) && matchesPriceRange(room)
     );
-    
-    // Debug log (remove after testing)
-    console.log(`Filtered rooms: ${filtered.length} out of ${rooms.length} (RoomType: "${selectedFilter.roomType}", Price: "${selectedFilter.priceRange}")`);
-    
+
+    // console.log(
+    //   `Filtered rooms: ${filtered.length} out of ${rooms.length} (RoomType: "${selectedFilter.roomType}", Price: "${selectedFilter.priceRange}")`
+    // );
+
     return filtered;
   };
 
-  // Sort rooms based on selected sort option (compatible with your structure)
   const sortRooms = (filteredRooms) => {
     const sorted = [...filteredRooms].sort((a, b) => {
       const priceA = Number(a?.pricePerNight || 0);
@@ -108,35 +77,30 @@ function Rooms() {
       if (selectedSort === "Newest First") {
         return dateB - dateA;
       }
-      return 0; // No sorting
+      return 0;
     });
     return sorted;
   };
 
-  console.log("All rooms:", rooms); // Your existing log
+  // console.log("All rooms:", rooms);
 
-  // Get filtered and sorted rooms
   const filteredRooms = filterRooms();
   const sortedRooms = sortRooms(filteredRooms);
 
-  // Calculate total pages
   const pageCount = Math.ceil(sortedRooms.length / itemsPerPage);
 
-  // Slice data for current page
   const offset = currentPage * itemsPerPage;
   const currentItems = sortedRooms.slice(offset, offset + itemsPerPage);
 
-  // Handle page click
   const handlePageClick = ({ selected }) => {
     setCurrentPage(selected);
   };
 
-  // Updated handler for single-select (radio buttons)
   const handleFilterChange = (value, type) => {
     setSelectedFilter((prevFilters) => {
       const updatedFilter = { ...prevFilters };
-      updatedFilter[type] = value; // Set directly as string
-      // Reset to first page when filters change
+      updatedFilter[type] = value;
+
       setCurrentPage(0);
       return updatedFilter;
     });
@@ -144,18 +108,18 @@ function Rooms() {
 
   const handleSortChange = (sortOption) => {
     setSelectedSort(sortOption);
-    // Reset to first page when sort changes
+
     setCurrentPage(0);
   };
 
-  // Clear all filters and sort
+  
   const clearFilters = () => {
-    setSelectedFilter({ roomType: "", priceRange: "" }); // Reset to empty strings
+    setSelectedFilter({ roomType: "", priceRange: "" });
     setSelectedSort("");
     setCurrentPage(0);
   };
 
-  // Loading state (use if fetching; otherwise, check rooms.length === 0)
+  
   if (loading || rooms.length === 0) {
     return <Loader />;
   }
@@ -197,7 +161,7 @@ function Rooms() {
                     ))}
                   </div>
                   <div className="flex flex-col gap-3">
-                    <p className="text-gray-600 text-xl">
+                    <p className="text-gray-600 text-md">
                       {item?.hotel?.city || "Unknown City"}
                     </p>
                     <p className="text-black text-xl md:text-3xl">
@@ -209,7 +173,7 @@ function Rooms() {
                         200+ reviews
                       </p>
                     </div>
-                    <p className="text-gray-500 text-lg flex gap-1 items-center">
+                    <p className="text-gray-500 text-md flex gap-1 items-center">
                       <MapPin />
                       {item?.hotel?.address || "Address not available"}
                     </p>
@@ -217,7 +181,7 @@ function Rooms() {
                       {item?.amenities?.slice(0, 3)?.map((amenity, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-center gap-2 w-[144px] h-9 rounded-full bg-gray-100"
+                          className="flex items-center justify-center gap-2 w-[144px] h-9 rounded-full bg-gray-200"
                         >
                           {/* <img
                             src={facilityIcons[amenity]?.src || "/assets/default-icon.png"}

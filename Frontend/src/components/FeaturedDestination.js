@@ -5,12 +5,17 @@ import { useRouter } from "next/router";
 import { useAppContext } from "@/context/AppContext";
 
 function FeaturedDestination() {
-  const router = useRouter();
-  const { rooms } = useAppContext();
-  console.log("rooms Data--->", rooms);
+  // const router = useRouter();
+  const { rooms, router } = useAppContext();
+  // console.log("rooms Data--->", rooms);
+
+  const handlePush = (id) => {
+    console.log("push--->", id);
+    router.push(`/RoomDetails/${id}`);
+  };
 
   return (
-    <div className="md:pb-20 bg-green-50 md:max-w-8xl xl:px-20 w-full mx-auto">
+    <div className="md:pb-20 bg-slate-50 md:max-w-8xl xl:px-20 w-full mx-auto">
       <div className="2xl:container 2xl:mx-auto px-4">
         <p className="font-playfair font-semibold md:font-normal text-black text-2xl md:text-4xl text-center pt-10 md:pt-16">
           Featured Destination
@@ -36,7 +41,7 @@ function FeaturedDestination() {
 
               {/* Image */}
               <img
-                onClick={() => router.push(`RoomDetails/${room?._id}`)}
+                onClick={() => handlePush(room?._id)}
                 className="object-cover cursor-pointer h-60"
                 src={room?.image[0]}
                 alt="Hotel image"
@@ -79,7 +84,10 @@ function FeaturedDestination() {
                     ${room?.pricePerNight}
                     <span className="text-sm text-gray-500"> / night</span>
                   </p>
-                  <button className="bg-black cursor-pointer text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition">
+                  <button
+                    onClick={() => handlePush(room?._id)}
+                    className="bg-black cursor-pointer text-white text-sm px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+                  >
                     Book Now
                   </button>
                 </div>

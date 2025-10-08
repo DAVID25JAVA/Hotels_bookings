@@ -11,7 +11,6 @@ export default function MyApp({ Component, pageProps, router }) {
   const isDashboardRoute = router.pathname.startsWith("/dashboard");
 
   if (isDashboardRoute) {
-    // Wrap dashboard pages with DashboardLayout
     return (
       <div>
         <Toaster />

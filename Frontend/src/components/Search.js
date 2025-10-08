@@ -1,67 +1,64 @@
-import React from "react";
+import React, { useState } from "react";
 import { cities } from "../../public/assets";
+import { CalendarDays, Locate, LocateIcon, User } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
 
 function Search() {
+  const { router, setSearchCities, searchCities, getToken } = useAppContext();
+  const [destination, setDestination] = useState("");
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    router.push(`Rooms?destination=${destination}`);
+    await axios.post(
+      "/api/user/recent-search-cities",
+      { recentSearchCities: destination },
+      { headers: { Authorization: `Bearer ${await getToken()}` } }
+    );
+    setSearchCities((prevSearchCities) => {
+      console.log(prevSearchCities, destination);
+      const updatedSearchCities = [...prevSearchCities, destination];
+      if (updatedSearchCities.length > 3) {
+        updatedSearchCities.shift();
+      }
+      return updatedSearchCities;
+    });
+  };
+
   return (
     <>
-      <form className="bg-white text-gray-500 rounded-lg px-6 py-4 md:max-w-3xl max-w-3xs  flex flex-col md:flex-row max-md:it ems-start gap-4 max-md:mx-auto">
+      <form
+        onSubmit={handleSearch}
+        className="bg-white text-gray-500 rounded-lg px-6 py-4 md:max-w-3xl max-w-3xs  flex flex-col md:flex-row max-md:it ems-start gap-4 max-md:mx-auto"
+      >
         <div>
           <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4 text-gray-800"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"
-              />
-            </svg>
+            <LocateIcon />
             <label htmlFor="destinationInput">Destination</label>
           </div>
           <input
             list="destinations"
             id="destinationInput"
             type="text"
-            className=" rounded border border-gray-200 px-3 py-1.5 mt-1.5 text-sm outline-none"
-            placeholder="Type here"
+            placeholder="Type or select a city..."
+            value={destination} 
+            onChange={(e) => setDestination(e.target.value)} 
+            className="w-full rounded border border-gray-200 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           />
           <datalist id="destinations">
             {cities?.map((city, index) => (
-              <option value={city} key={index}>
-                <select>{city}</select>
-              </option>
+              <select key={index}>
+                <option>{city}</option>
+              </select>
             ))}
           </datalist>
         </div>
 
         <div>
           <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4 text-gray-800"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"
-              />
-            </svg>
+            <CalendarDays className="w-4" />
             <label htmlFor="checkIn">Check in</label>
           </div>
           <input
@@ -73,23 +70,7 @@ function Search() {
 
         <div>
           <div className="flex items-center gap-2">
-            <svg
-              className="w-4 h-4 text-gray-800"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"
-              />
-            </svg>
+            <CalendarDays className="w-4" />
             <label htmlFor="checkOut">Check out</label>
           </div>
           <input
@@ -100,7 +81,10 @@ function Search() {
         </div>
 
         <div className="flex md:flex-col max-md:gap-2 max-md:items-center">
-          <label htmlFor="guests">Guests</label>
+          <div className="flex">
+            <User className="w-4" />
+            <label htmlFor="guests">Guests</label>
+          </div>
           <input
             min={1}
             max={4}

@@ -169,7 +169,7 @@ function Navbar({ openRegisterModal }) {
             </button>
 
             {navLinks.map((link, i) => (
-              <div
+              <div key={i}
                 onClick={() => {
                   router.push(link?.path);
                   setIsMenuOpen(false);

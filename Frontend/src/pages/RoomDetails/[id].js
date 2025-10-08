@@ -1,24 +1,105 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { facilityIcons, roomsDummyData } from "../../../public/assets";
 import StarRating from "@/components/StarRating";
 import { assets } from "../../../public/assets";
 import { roomCommonData } from "../../../public/assets";
+import { useAppContext } from "@/context/AppContext";
+import Loader from "@/components/Loader";
+import toast from "react-hot-toast";
+// import { headers } from "next/headers";
 
 function RoomDetails() {
   const router = useRouter();
   const roomsId = router.query?.id;
-
-  const [roomsData, setRoomsData] = useState({});
-  const [roomImage, setRoomImage] = useState();
+  console.log(roomsId);
+  const [roomsData, setRoomsData] = useState([]);
+  const [roomImage, setRoomImage] = useState(null);
+  const { rooms, axios, getToken } = useAppContext();
+  const [guest, setGuest] = useState(1);
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [isAvailability, setIsAvailability] = useState(false);
 
   useEffect(() => {
-    const roomData = roomsDummyData?.find((roomId) => roomId?._id == roomsId);
+    const roomData = rooms?.find((roomId) => roomId?._id == roomsId);
     roomData && setRoomsData(roomData);
-    roomData && setRoomImage(roomData?.images[0]);
-  }, [roomsId]);
-
+    roomData && setRoomImage(roomData?.image[0]);
+  }, [roomsId, rooms]);
   // console.log("Rooms data----->", roomsData);
+
+  const isRoomAvailability = async () => {
+    console.log("check ");
+    
+    try {
+      if (!guest || !checkInDate || !checkOutDate) {
+        toast.error("Plase fill date and guest details !");
+        return;
+      }
+
+      if (checkInDate >= checkOutDate) {
+        toast.error("Check-in Date should be less than Check-out Date !");
+        return;
+      }
+
+      const { data } = await axios.post("/api/bookings/check-availability", {
+        room: roomsId,
+        checkInDate,
+        checkOutDate,
+      });
+      console.log("isAvailability Data---->", data);
+
+      if (data?.success) {
+        if (data?.isbookingAvailable) {
+          setIsAvailability(true);
+          toast.success("Room is available");
+        } else {
+          setIsAvailability(false);
+          toast.error("Room is not avalable");
+        }
+      } else {
+        toast.error(data?.message);
+      }
+    } catch (error) {
+      toast.error(error?.message);
+      console.log(error);
+    }
+  };
+
+  const onSubmitBooking = async (e) => {
+    e.preventDefault();
+    try {
+      if (!isAvailability) {
+        return isRoomAvailability();
+      } else {
+        const { data } = await axios.post(
+          "/api/bookings/book",
+          {
+            room: roomsId,
+            guest,
+            checkInDate,
+            checkOutDate,
+            paymentMethod: "Pay at Hotel",
+          },
+          {
+            headers: { Authorization: `Bearer ${await getToken()}` },
+          }
+        );
+        if (data?.success) {
+          toast.success(data?.message);
+          router.push("/My-booking");
+          scrollTo(0, 0);
+        } else {
+          toast.error(data?.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error?.message);
+    }
+  };
+
+  if (rooms?.length == 0) {
+    return <Loader />;
+  }
 
   return (
     roomsData && (
@@ -52,14 +133,14 @@ function RoomDetails() {
         {/* Room Images */}
         <div className="flex flex-col md:flex-row gap-3 my-3">
           <img
-            src={roomImage?.src}
+            src={roomImage}
             alt="room image"
             className=" rounded-2xl md:w-1/2"
           />
           <div className="grid grid-cols-2  gap-3 cursor-pointer">
-            {roomsData?.images?.map((img) => (
+            {roomsData?.image?.map((img) => (
               <img
-                src={img?.src}
+                src={img}
                 onClick={() => setRoomImage(img)}
                 alt="room img"
                 className={`rounded-2xl ${
@@ -77,7 +158,7 @@ function RoomDetails() {
             Experience Luxury Like Never Before
           </h1>
           <p className="text-gray-800 font-semibold text-xl md:text-2xl">
-            ${roomsData?.pricePerNight}/night
+            ${roomsData?.pricePerNight}/Night
           </p>
         </div>
 
@@ -86,13 +167,13 @@ function RoomDetails() {
             return (
               <div
                 key={index}
-                className="w-[140px] bg-gray-100 px-2 py-1 flex items-center justify-center gap-2 rounded-full"
+                className="w-[115px] bg-gray-200 px-2 py-2 flex items-center justify-center gap-2 rounded-full"
               >
-                <img
+                {/* <img
                   src={facilityIcons[item]?.src}
                   alt={item}
                   className="w-5 h-8"
-                />
+                /> */}
                 <p className="text-black text-sm">{item}</p>
               </div>
             );
@@ -100,42 +181,54 @@ function RoomDetails() {
         </div>
 
         {/* Check Room Availability */}
-        <div
-          style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.15)" }}
-          className="mt-10 py-8 rounded-2xl flex items-center flex-wrap gap-5 md:gap-0 justify-between px-10"
-        >
-          <div className="flex gap-5 flex-wrap">
-            <div className="flex flex-col">
-              <label className="text-gray-600 font-semibold">Check-In</label>
-              <input
-                type="date"
-                className="border p-2 border-gray-300 rounded md:w-60 max-w-full text-gray-600"
-              />
+        <form onSubmit={onSubmitBooking}>
+          <div
+            style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.15)" }}
+            className="mt-10 py-8 rounded-2xl flex items-center flex-wrap gap-5 md:gap-0 justify-between px-10"
+          >
+            <div className="flex gap-5 flex-wrap">
+              <div className="flex flex-col">
+                <label className="text-gray-600 font-semibold">Check-In</label>
+                <input
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setCheckInDate(e.target.value)}
+                  type="date"
+                  className="border p-2 border-gray-300 rounded md:w-60 max-w-full text-gray-600"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-gray-600 font-semibold">Check-In</label>
+                <input
+                  min={checkInDate}
+                  disabled={!checkInDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  type="date"
+                  className="border p-2 border-gray-300 rounded md:w-60 max-w-full text-gray-600"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-gray-600 font-semibold">Guests</label>
+                <input
+                  type="number"
+                  value={guest}
+                  onChange={(e) => setGuest(e.target.value)}
+                  className="border p-2 border-gray-300 rounded md:w-16 text-gray-600"
+                />
+              </div>
             </div>
-            <div className="flex flex-col">
-              <label className="text-gray-600 font-semibold">Check-In</label>
-              <input
-                type="date"
-                className="border p-2 border-gray-300 rounded md:w-60 max-w-full text-gray-600"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-gray-600 font-semibold">Guests</label>
-              <input
-                type="number"
-                value={1}
-                className="border p-2 border-gray-300 rounded md:w-16 text-gray-600"
-              />
-            </div>
-          </div>
 
-          {/* Button */}
-          <div>
-            <button className="bg-blue-600 text-white text-xl md:w-80 w-full px-6 md:px-0 cursor-pointer h-14 rounded">
-              Check Availability
-            </button>
+            {/* Button */}
+            <div>
+              <button
+                type="submit"
+                // onClick={isRoomAvailability}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xl md:w-80 w-full px-6 md:px-0 cursor-pointer h-14 rounded"
+              >
+                {isAvailability ? "Book Now" : " Check Availability"}
+              </button>
+            </div>
           </div>
-        </div>
+        </form>
 
         {/* Room Specification  */}
         <div className="mt-10 mb-5">
@@ -187,7 +280,9 @@ function RoomDetails() {
           </div>
         </div>
 
-        <button className="bg-blue-600 text-white my-2 md:w-40 w-32 h-12 rounded-lg">Contact Now</button>
+        <button className="bg-blue-600 text-white my-2 md:w-40 w-32 h-12 rounded-lg">
+          Contact Now
+        </button>
       </div>
     )
   );
